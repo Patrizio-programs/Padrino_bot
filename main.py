@@ -11,6 +11,7 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
 )
 
+chat_history=[]
 # bot setup
 bot_key = os.environ["BOT_TOKEN"]
 bot = telebot.TeleBot(bot_key)
@@ -78,8 +79,17 @@ def generate_chat_prompt(system_message, human_message, bot, chat_id, message_id
     chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
     # Format the chat prompt and convert it to messages
     messages = chat_prompt.format_prompt().to_messages()
+    
+    # Append the human message and response to the chat history
+    chat_history.append((human_message, str(chat_prompt.format_prompt())))
+    
+    # Limit chat history to the last 10 entries
+    if len(chat_history) > 10:
+        chat_history.pop(0)  # Remove the oldest entry
+    
     # Generate the response from the chatbot
     response = llm(str(chat_prompt.format_prompt()))
+    
     return response
 
 # /start
